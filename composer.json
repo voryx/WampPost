@@ -1,0 +1,11 @@
+{
+    "autoload": {
+        "psr-0": {
+            "WampPost": "src"
+        }
+    },
+    "require": {
+        "react/http": "~0.4",
+        "voryx/thruway": "dev-master"
+    }
+}
