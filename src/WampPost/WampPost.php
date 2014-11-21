@@ -16,11 +16,10 @@ class WampPost extends Client {
     private $bindAddress;
     private $port;
     private $realmName;
-    private $loop;
     private $socket;
     private $http;
 
-    function __construct($realmName, $routerAddress = 'ws://127.0.0.1:9090/', $bindAddress = '127.0.0.1', $port = 8181, $loop = null)
+    function __construct($realmName, $loop = null, $bindAddress = '127.0.0.1', $port = 8181)
     {
         if ($loop === null) {
             $loop = Factory::create();
@@ -38,8 +37,6 @@ class WampPost extends Client {
         $this->socket->listen($this->port, $bindAddress);
 
         parent::__construct($realmName, $loop);
-
-        $this->addTransportProvider(new PawlTransportProvider($routerAddress));
     }
 
     public function start($startLoop = true) {
