@@ -9,10 +9,8 @@ use React\Socket\Server;
 use React\Stream\BufferedSink;
 use Thruway\Peer\Client;
 use Thruway\Role\AbstractRole;
-use Thruway\Transport\PawlTransportProvider;
 
 class WampPost extends Client {
-    private $routerAddress;
     private $bindAddress;
     private $port;
     private $realmName;
@@ -25,7 +23,6 @@ class WampPost extends Client {
             $loop = Factory::create();
         }
 
-        $this->routerAddress = $routerAddress;
         $this->bindAddress = $bindAddress;
         $this->port = $port;
         $this->realmName = $realmName;
@@ -40,7 +37,6 @@ class WampPost extends Client {
     }
 
     public function start($startLoop = true) {
-
 
         parent::start($startLoop);
     }

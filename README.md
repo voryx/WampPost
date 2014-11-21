@@ -61,3 +61,32 @@ An example using curl:
 ```
 curl -H "Content-Type: application/json" -d '{"topic": "com.myapp.topic1", "args": ["Hello, world"]}' http://127.0.0.1:8181/pub
 ```
+
+### Running WampPost Client Internally in Your Thruway Router
+
+This Client can be easily run as an internal client in your Thruway Router.
+
+```php
+<?php
+require_once __DIR__ . "/vendor/autoload.php";
+
+use Thruway\Peer\Router;
+use Thruway\Transport\RatchetTransportProvider;
+
+$router = new Router();
+
+//////// WampPost part
+// The WampPost client
+// create an HTTP server on port 8181 - notice that we have to
+// send in the same loop that the router is running on
+$wp = new WampPost\WampPost('realm1', $router->getLoop(), '127.0.0.1', 8181);
+
+// add a transport to connect to the WAMP router
+$router->addTransportProvider(new Thruway\Transport\InternalClientTransportProvider($wp));
+//////////////////////
+
+// The websocket transport provider for the router
+$transportProvider = new RatchetTransportProvider("127.0.0.1", 9090);
+$router->addTransportProvider($transportProvider);
+$router->start();
+```
