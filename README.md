@@ -4,7 +4,7 @@ WampPost
 WampPost is a [WAMP v2](http://wamp.ws/) (Web Application Messaging Protocol) Client built with 
 [Thruway](https://github.com/voryx/Thruway) that allows publishing events to a realm via HTTP Post.
 
-WampPost is designed to be compatible with the [crossbar HTTP pusher service)[http://crossbar.io/docs/HTTP-Pusher-Service/].
+WampPost is designed to be compatible with the [crossbar HTTP pusher service](http://crossbar.io/docs/HTTP-Pusher-Service/).
  
 There is no security on the HTTP side, so if this is going to be used, it would be best to use it only
 on localhost or behind some other security measure.
