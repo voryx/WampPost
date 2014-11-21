@@ -34,7 +34,7 @@ If you need a WAMP router to test with, then start the sample with:
 
       $ php vendor/voryx/thruway/Examples/SimpleWsServer.php
     
-Thruway is now running on 127.0.0.1 port 9090 
+Thruway is now running on 127.0.0.1 port 9090.
 
 ### PHP WampPost Client Usage
 
