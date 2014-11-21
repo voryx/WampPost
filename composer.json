@@ -1,4 +1,25 @@
 {
+    "name": "voryx/wamppost",
+    "description": "HTTP to WAMP Publishing Proxy",
+    "keywords": [
+        "WebSockets",
+        "PubSub",
+        "Publish",
+        "WAMP",
+        "WAMP2",
+        "HTTP",
+        "Proxy"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Matt Bonneau", "email": "matt@bonneau.net", "role": "Developer"
+        },
+
+        {
+            "name": "David Dan", "email": "davidwdan@gmail.com", "role": "Developer"
+        }
+    ],
     "autoload": {
         "psr-0": {
             "WampPost": "src"
