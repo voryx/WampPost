@@ -59,5 +59,5 @@ Now that you have a WampPost client, you will be able to publish messages to the
 An example using curl:
 
 ```
-curl -H "Content-Type: application/json" -d '{"topic": ".myapp.topic1", "args": ["Hello, world"]}' http://127.0.0.1:8181/pub
+curl -H "Content-Type: application/json" -d '{"topic": "com.myapp.topic1", "args": ["Hello, world"]}' http://127.0.0.1:8181/pub
 ```
