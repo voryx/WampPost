@@ -51,10 +51,8 @@ class WampPost extends Client {
      */
     public function handleRequest($request, $response) {
         if ($request->getPath() == '/pub' && $request->getMethod() == 'POST') {
-            // get the body
-            echo "Content length is " . $request->getHeaders()['Content-Length'] . "\n";
-
-            BufferedSink::createPromise($request)->then(function ($body) use ($request, $response) {
+            $bodySnatcher = new BodySnatcher($request);
+            $bodySnatcher->promise()->then(function ($body) use ($request, $response) {
                 try {
                     //{"topic": "com.myapp.topic1", "args": ["Hello, world"]}
                     $json = json_decode($body);
@@ -62,17 +60,18 @@ class WampPost extends Client {
                     if (isset($json->topic) && isset($json->args)
                         && AbstractRole::uriIsValid($json->topic)
                         && is_array($json->args)
+                        && ($this->getPublisher() !== null)
                     ) {
                         $this->getSession()->publish($json->topic, $json->args);
                     }
                 } catch (\Exception $e) {
                     // should shut down everything
                 }
+                $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                $response->end("pub");
             });
-            $response->writeHead(200, ['Content-Type' => 'text/plain']);
-            $response->end("pub");
         } else {
-            $response->writeHead(404, ['Content-Type' => 'text/plain']);
+            $response->writeHead(404, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
             $response->end("Not found");
         }
     }
