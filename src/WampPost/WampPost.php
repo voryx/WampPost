@@ -7,6 +7,7 @@ use React\Http\Request;
 use React\Http\Response;
 use React\Socket\Server;
 use React\Stream\BufferedSink;
+use Thruway\CallResult;
 use Thruway\Peer\Client;
 use Thruway\Role\AbstractRole;
 
@@ -70,9 +71,60 @@ class WampPost extends Client {
                 $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
                 $response->end("pub");
             });
+        } else if ($request->getPath() == '/call' && $request->getMethod() == 'POST') {
+            $this->handleCallHttpRequest($request, $response);
         } else {
             $response->writeHead(404, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
             $response->end("Not found");
         }
+    }
+
+    private function handleCallHttpRequest($request, $response) {
+        $bodySnatcher = new BodySnatcher($request);
+        $bodySnatcher->promise()->then(function ($body) use ($request, $response) {
+            try {
+                //{"procedure": "com.myapp.procedure1", "args": ["Hello, world"], "argsKw": {}, "options": {} }
+                $json = json_decode($body);
+
+                if (isset($json->procedure)
+                    && AbstractRole::uriIsValid($json->procedure)
+                    && ($this->getCaller() !== null)
+                ) {
+                    $args = isset($json->args) && is_array($json->args) ? $json->args : null;
+                    $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
+                    $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
+
+                    $this->getSession()->call($json->procedure, $args, $argsKw, $options)->then(
+                        /** @param CallResult $result */
+                        function (CallResult $result) use ($response) {
+                            $responseObj = new \stdClass();
+                            $responseObj->result = "SUCCESS";
+                            $responseObj->args = $result->getArguments();
+                            $responseObj->argsKw = $result->getArgumentsKw();
+                            $responseObj->details = $result->getDetails();
+
+                            $response->writeHead(200, ['Content-Type' => 'application/json', 'Connection' => 'close']);
+                            $response->end(json_encode($responseObj));
+                        },
+                        function ($result) use ($response) {
+                            $responseObj = new \stdClass();
+                            $responseObj->result = "ERROR";
+
+                            // maybe return an error code here
+                            $response->writeHead(200, ['Content-Type' => 'application/json', 'Connection' => 'close']);
+                            $response->end(json_encode($responseObj));
+                        }
+                    );
+                } else {
+                    // maybe return an error code here
+                    $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                    $response->end("No procedure set");
+                }
+            } catch (\Exception $e) {
+                // maybe return an error code here
+                $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                $response->end("Problem");
+            }
+        });
     }
 }
