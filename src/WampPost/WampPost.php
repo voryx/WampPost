@@ -6,10 +6,9 @@ use React\EventLoop\Factory;
 use React\Http\Request;
 use React\Http\Response;
 use React\Socket\Server;
-use React\Stream\BufferedSink;
 use Thruway\CallResult;
+use Thruway\Common\Utils;
 use Thruway\Peer\Client;
-use Thruway\Role\AbstractRole;
 
 class WampPost extends Client {
     private $bindAddress;
@@ -59,7 +58,7 @@ class WampPost extends Client {
                     $json = json_decode($body);
 
                     if (isset($json->topic) && isset($json->args)
-                        && AbstractRole::uriIsValid($json->topic)
+                        && Utils::uriIsValid($json->topic)
                         && is_array($json->args)
                         && ($this->getPublisher() !== null)
                     ) {
@@ -87,7 +86,7 @@ class WampPost extends Client {
                 $json = json_decode($body);
 
                 if (isset($json->procedure)
-                    && AbstractRole::uriIsValid($json->procedure)
+                    && Utils::uriIsValid($json->procedure)
                     && ($this->getCaller() !== null)
                 ) {
                     $args = isset($json->args) && is_array($json->args) ? $json->args : null;
