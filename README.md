@@ -2,7 +2,7 @@ WampPost
 ===========
 
 WampPost is a [WAMP v2](http://wamp.ws/) (Web Application Messaging Protocol) Client built with 
-[Thruway](https://github.com/voryx/Thruway) that allows publishing events to a realm via HTTP Post.
+[Thruway](https://github.com/voryx/Thruway) that allows publishing events and making RPC calls to a realm via HTTP Post.
 
 WampPost is designed to be compatible with the [crossbar HTTP pusher service](http://crossbar.io/docs/HTTP-Pusher-Service/).
  
@@ -60,6 +60,25 @@ An example using curl:
 
 ```
 curl -H "Content-Type: application/json" -d '{"topic": "com.myapp.topic1", "args": ["Hello, world"]}' http://127.0.0.1:8181/pub
+```
+
+### Making an RPC Call
+
+```
+curl -H "Content-Type: application/json" \
+   -d '{"procedure": "org.eggs.get_current_sessions"}' \
+   http://127.0.0.1:8181/call
+```
+
+RPC calls return a JSON object in the body:
+
+```
+{
+    result: "SUCCESS",
+    args: []
+    argsKw: {}
+    details: {}
+}
 ```
 
 ### Running WampPost Client Internally in Your Thruway Router
