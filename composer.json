@@ -27,6 +27,6 @@
     },
     "require": {
         "react/http": "~0.4",
-        "voryx/thruway": "0.3.x-dev"
+        "voryx/thruway": "~0.3"
     }
 }
