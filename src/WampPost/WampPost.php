@@ -62,7 +62,9 @@ class WampPost extends Client {
                         && is_array($json->args)
                         && ($this->getPublisher() !== null)
                     ) {
-                        $this->getSession()->publish($json->topic, $json->args);
+                        $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
+                        $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
+                        $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
                     }
                 } catch (\Exception $e) {
                     // should shut down everything
