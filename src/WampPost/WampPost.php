@@ -63,7 +63,9 @@ class WampPost extends Client {
                         return;
                     }
 
-                    if (isset($json->topic) && isset($json->args)
+                    if (
+                        isset($json->topic)
+                        && isset($json->args)
                         && Utils::uriIsValid($json->topic)
                         && is_array($json->args)
                         && ($this->getPublisher() !== null)
@@ -71,6 +73,30 @@ class WampPost extends Client {
                         $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
                         $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
                         $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
+                    } else {
+
+                        $errors = [];
+                        if (!isset($json->topic)) {
+                            $errors[] = 'Topic not set';
+                        }
+                        if (!isset($json->args)) {
+                            $errors[] = 'Args not set';
+                        }
+                        if (!is_array($json->args)) {
+                            $errors[] = 'Args is not an array, got ' . gettype($json->args);
+                        }
+                        if (!Utils::uriIsValid($json->topic)) {
+                            $errors[] = 'Topic is not a valid URI';
+                        }
+                        if (!($this->getPublisher() !== null)) {
+                            $errors[] = 'Publisher is not set';
+                        }
+
+                        $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                        $response->end(
+                            "The following errors occurred:" . PHP_EOL . PHP_EOL . implode(PHP_EOL, $errors)
+                        );
+                        return;
                     }
                 } catch (\Exception $e) {
                     // should shut down everything
