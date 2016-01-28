@@ -4,6 +4,7 @@ namespace WampPost\Tests\Functional;
 
 use React\HttpClient\Response;
 use Thruway\ClientSession;
+use Thruway\Exception\WampErrorException;
 use Thruway\Message\EventMessage;
 use WampPost\WampPost;
 
@@ -19,6 +20,9 @@ class WampPostTest extends TestCase
 
         $wampPost->on('open', function (ClientSession $session) use (&$opened, $router) {
             $opened = true;
+            $session->register("procedure.that.errors", function () {
+                throw new WampErrorException("my.custom.error", [4,5,6], (object)["x"=>"y"], (object)["y"=>"z"]);
+            });
         });
 
         $router->addInternalClient($wampPost);
@@ -148,10 +152,6 @@ class WampPostTest extends TestCase
         $this->assertEvents([], $events);
     }
 
-    public function testBadPath()
-    {
-    }
-
     public function testNoTopicPublish()
     {
         /** @var Response $response */
@@ -207,6 +207,28 @@ class WampPostTest extends TestCase
 
         $this->assertEquals($responseBody, "9\r\nNot found\r\n0\r\n\r\n");
         $this->assertEquals(404, $response->getCode());
+
+        $this->assertEvents([], $events);
+    }
+
+    public function testCallWithError()
+    {
+        /** @var Response $response */
+        list($response, $responseBody, $events) = $this->runTestWith(
+            "POST",
+            "http://127.0.0.1:18181/call",
+            [],
+            '1.0',
+            json_encode(
+                [
+                    "procedure" => "procedure.that.errors",
+                    "args"      => [1,2,3]
+                ]
+            )
+        );
+
+        $this->assertEquals($responseBody, "78\r\n{\"result\":\"ERROR\",\"error_uri\":\"my.custom.error\",\"error_args\":[4,5,6],\"error_argskw\":{\"x\":\"y\"},\"error_details\":{\"y\":\"z\"}}\r\n0\r\n\r\n");
+        $this->assertEquals(200, $response->getCode());
 
         $this->assertEvents([], $events);
     }

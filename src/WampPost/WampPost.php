@@ -8,6 +8,7 @@ use React\Http\Response;
 use React\Socket\Server;
 use Thruway\CallResult;
 use Thruway\Common\Utils;
+use Thruway\Message\ErrorMessage;
 use Thruway\Peer\Client;
 
 class WampPost extends Client {
@@ -129,18 +130,22 @@ class WampPost extends Client {
                     $this->getSession()->call($json->procedure, $args, $argsKw, $options)->then(
                         /** @param CallResult $result */
                         function (CallResult $result) use ($response) {
-                            $responseObj = new \stdClass();
-                            $responseObj->result = "SUCCESS";
-                            $responseObj->args = $result->getArguments();
-                            $responseObj->argsKw = $result->getArgumentsKw();
+                            $responseObj          = new \stdClass();
+                            $responseObj->result  = "SUCCESS";
+                            $responseObj->args    = $result->getArguments();
+                            $responseObj->argsKw  = $result->getArgumentsKw();
                             $responseObj->details = $result->getDetails();
 
                             $response->writeHead(200, ['Content-Type' => 'application/json', 'Connection' => 'close']);
                             $response->end(json_encode($responseObj));
                         },
-                        function ($result) use ($response) {
-                            $responseObj = new \stdClass();
-                            $responseObj->result = "ERROR";
+                        function (ErrorMessage $msg) use ($response) {
+                            $responseObj                = new \stdClass();
+                            $responseObj->result        = "ERROR";
+                            $responseObj->error_uri     = $msg->getErrorURI();
+                            $responseObj->error_args    = $msg->getArguments();
+                            $responseObj->error_argskw  = $msg->getArgumentsKw();
+                            $responseObj->error_details = $msg->getDetails();
 
                             // maybe return an error code here
                             $response->writeHead(200, ['Content-Type' => 'application/json', 'Connection' => 'close']);
