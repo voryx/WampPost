@@ -14,6 +14,8 @@ class WampPost extends Client {
     private $bindAddress;
     private $port;
     private $realmName;
+
+    /** @var Server */
     private $socket;
     private $http;
 
@@ -46,49 +48,67 @@ class WampPost extends Client {
     }
 
     /**
+     * @inheritDoc
+     */
+    public function onClose($reason)
+    {
+        $this->socket->shutdown();
+
+        parent::onClose($reason);
+    }
+
+    /**
      * @param Request $request
      * @param Response $response
      */
-    public function handleRequest($request, $response) {
+    public function handleRequest(Request $request, Response $response) {
         if ($request->getPath() == '/pub' && $request->getMethod() == 'POST') {
-            $bodySnatcher = new BodySnatcher($request);
-            $bodySnatcher->promise()->then(function ($body) use ($request, $response) {
-                try {
-                    //{"topic": "com.myapp.topic1", "args": ["Hello, world"]}
-                    $json = json_decode($body);
-
-                    if ($json === null) {
-                        $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
-                        $response->end("JSON decoding failed: " . json_last_error_msg());
-                        return;
-                    }
-
-                    if (isset($json->topic) && isset($json->args)
-                        && Utils::uriIsValid($json->topic)
-                        && is_array($json->args)
-                        && ($this->getPublisher() !== null)
-                    ) {
-                        $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
-                        $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
-                        $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
-                    }
-                } catch (\Exception $e) {
-                    // should shut down everything
-                    $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
-                    $response->end(
-                        "An exception was thrown: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString()
-                    );
-                    return;
-                }
-                $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
-                $response->end("pub");
-            });
+            $this->handlePublishHttpPost($request, $response);
         } else if ($request->getPath() == '/call' && $request->getMethod() == 'POST') {
             $this->handleCallHttpRequest($request, $response);
         } else {
             $response->writeHead(404, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
             $response->end("Not found");
         }
+    }
+
+    private function handlePublishHttpPost(Request $request, Response $response) {
+        $bodySnatcher = new BodySnatcher($request);
+        $bodySnatcher->promise()->then(function ($body) use ($request, $response) {
+            try {
+                //{"topic": "com.myapp.topic1", "args": ["Hello, world"]}
+                $json = json_decode($body);
+
+                if ($json === null) {
+                    throw new \Exception("JSON decoding failed: " . json_last_error_msg());
+                }
+
+                if (isset($json->topic)
+                    && is_scalar($json->topic)
+                    && isset($json->args)
+                    && is_array($json->args)
+                    && ($this->getPublisher() !== null)
+                ) {
+                    $json->topic = strtolower($json->topic);
+                    if (!Utils::uriIsValid($json->topic)) {
+                        throw new \Exception("Invalid URI: " . $json->topic);
+                    }
+
+                    $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
+                    $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
+                    $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
+                } else {
+                    throw new \Exception("Invalid request: " . json_encode($json));
+                }
+            } catch (\Exception $e) {
+                // should shut down everything
+                $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                $response->end("Bad Request: " . $e->getMessage());
+                return;
+            }
+            $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+            $response->end("pub");
+        });
     }
 
     private function handleCallHttpRequest($request, $response) {

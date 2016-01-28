@@ -28,5 +28,9 @@
     "require": {
         "react/http": "~0.4",
         "voryx/thruway": "~0.3"
+    },
+    "require-dev": {
+        "react/http-client": "^0.4.8",
+        "voryx/event-loop": "^0.2.0"
     }
 }
