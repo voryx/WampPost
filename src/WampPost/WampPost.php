@@ -57,6 +57,12 @@ class WampPost extends Client {
                     //{"topic": "com.myapp.topic1", "args": ["Hello, world"]}
                     $json = json_decode($body);
 
+                    if ($json === null) {
+                        $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                        $response->end("JSON decoding failed: " . json_last_error_msg());
+                        return;
+                    }
+
                     if (isset($json->topic) && isset($json->args)
                         && Utils::uriIsValid($json->topic)
                         && is_array($json->args)
@@ -68,6 +74,11 @@ class WampPost extends Client {
                     }
                 } catch (\Exception $e) {
                     // should shut down everything
+                    $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                    $response->end(
+                        "An exception was thrown: " . $e->getMessage() . PHP_EOL . $e->getTraceAsString()
+                    );
+                    return;
                 }
                 $response->writeHead(200, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
                 $response->end("pub");
