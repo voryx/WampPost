@@ -96,7 +96,7 @@ class WampPost extends Client {
                     }
 
                     $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
-                    $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
+                    $options = isset($json->options) && is_object($json->options) ? $json->options : null;
                     $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
                 } else {
                     throw new \Exception("Invalid request: " . json_encode($json));

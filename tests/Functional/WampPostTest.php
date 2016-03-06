@@ -10,6 +10,11 @@ use WampPost\WampPost;
 
 class WampPostTest extends TestCase
 {
+    /**
+     * @var EventMessage[]
+     */
+    private $_testTopicEvents = [];
+
     private function runTestWith($method, $url, array $headers = [], $protocolVersion = '1.0', $body)
     {
         $router = $this->createTestRouter();
@@ -22,6 +27,14 @@ class WampPostTest extends TestCase
             $opened = true;
             $session->register("procedure.that.errors", function () {
                 throw new WampErrorException("my.custom.error", [4,5,6], (object)["x"=>"y"], (object)["y"=>"z"]);
+            });
+
+            $this->_testTopicEvents = [];
+
+            // this subscription is here to test that options are working ("exclude_me")
+            $session->subscribe("wamppost.tests.nonexclude.topic", function ($args, $argsKw, $details, $pubId) {
+                $event = new EventMessage(0, $pubId, $details, $args, $argsKw, "wamppost.tests.nonexclude.topic");
+                $this->_testTopicEvents[] = $event;
             });
         });
 
@@ -76,6 +89,41 @@ class WampPostTest extends TestCase
             ],
             $events
         );
+    }
+
+    function testPublishWithOptions()
+    {
+        /** @var Response $response */
+        list($response, $responseBody, $events) = $this->runTestWith(
+            "POST",
+            "http://127.0.0.1:18181/pub",
+            [],
+            '1.0',
+            json_encode(
+                [
+                    "topic" => "wamppost.tests.nonexclude.topic",
+                    "args"  => [1, "two"],
+                    "options" => [ "exclude_me" => false ]
+                ]
+            )
+        );
+
+        $this->assertEquals($responseBody, "3\r\npub\r\n0\r\n\r\n");
+        $this->assertEquals(200, $response->getCode());
+
+        $this->assertEvents(
+            [
+                new EventMessage(0, 0, (object)["topic" => "wamppost.tests.nonexclude.topic"], [1, "two"], null, null,
+                    "wamppost.tests.nonexclude.topic")
+            ],
+            $events
+        );
+
+        $this->assertEquals(1, count($this->_testTopicEvents));
+        $this->assertEvents([
+            new EventMessage(0, 0, new \stdClass(), [1, "two"], null, null,
+                "wamppost.tests.nonexclude.topic")
+        ], $this->_testTopicEvents);
     }
 
     function testPublishArgsArgsKw()
