@@ -125,7 +125,7 @@ class WampPost extends Client {
                 ) {
                     $args = isset($json->args) && is_array($json->args) ? $json->args : null;
                     $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
-                    $options = isset($json->options) && is_object($json->opitons) ? $json->options : null;
+                    $options = isset($json->options) && is_object($json->options) ? $json->options : null;
 
                     $this->getSession()->call($json->procedure, $args, $argsKw, $options)->then(
                         /** @param CallResult $result */
