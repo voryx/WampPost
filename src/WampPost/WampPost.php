@@ -20,7 +20,7 @@ class WampPost extends Client {
     private $socket;
     private $http;
 
-    function __construct($realmName, $loop = null, $bindAddress = '127.0.0.1', $port = 8181)
+    public function __construct($realmName, $loop = null, $bindAddress = '127.0.0.1', $port = 8181)
     {
         if ($loop === null) {
             $loop = Factory::create();
@@ -81,25 +81,43 @@ class WampPost extends Client {
                 $json = json_decode($body);
 
                 if ($json === null) {
-                    throw new \Exception("JSON decoding failed: " . json_last_error_msg());
+                    $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                    $response->end("JSON decoding failed: " . json_last_error_msg());
+                    return;
                 }
 
-                if (isset($json->topic)
-                    && is_scalar($json->topic)
+                if (
+                    isset($json->topic)
                     && isset($json->args)
+                    && Utils::uriIsValid($json->topic)
                     && is_array($json->args)
                     && ($this->getPublisher() !== null)
                 ) {
-                    $json->topic = strtolower($json->topic);
-                    if (!Utils::uriIsValid($json->topic)) {
-                        throw new \Exception("Invalid URI: " . $json->topic);
-                    }
-
                     $argsKw = isset($json->argsKw) && is_object($json->argsKw) ? $json->argsKw : null;
                     $options = isset($json->options) && is_object($json->options) ? $json->options : null;
                     $this->getSession()->publish($json->topic, $json->args, $argsKw, $options);
                 } else {
-                    throw new \Exception("Invalid request: " . json_encode($json));
+                    $errors = [];
+                    if (!isset($json->topic)) {
+                        $errors[] = 'Topic not set';
+                    }
+                    if (!isset($json->args)) {
+                        $errors[] = 'Args not set';
+                    }
+                    if (!is_array($json->args)) {
+                        $errors[] = 'Args is not an array, got ' . gettype($json->args);
+                    }
+                    if (!Utils::uriIsValid($json->topic)) {
+                        $errors[] = 'Topic is not a valid URI';
+                    }
+                    if (!($this->getPublisher() !== null)) {
+                        $errors[] = 'Publisher is not set';
+                    }
+                    $response->writeHead(400, ['Content-Type' => 'text/plain', 'Connection' => 'close']);
+                    $response->end(
+                        "The following errors occurred:" . PHP_EOL . PHP_EOL . implode(PHP_EOL, $errors)
+                    );
+                    return;
                 }
             } catch (\Exception $e) {
                 // should shut down everything
@@ -128,7 +146,7 @@ class WampPost extends Client {
                     $options = isset($json->options) && is_object($json->options) ? $json->options : null;
 
                     $this->getSession()->call($json->procedure, $args, $argsKw, $options)->then(
-                        /** @param CallResult $result */
+                    /** @param CallResult $result */
                         function (CallResult $result) use ($response) {
                             $responseObj          = new \stdClass();
                             $responseObj->result  = "SUCCESS";
