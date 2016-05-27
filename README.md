@@ -67,7 +67,7 @@ curl -H "Content-Type: application/json" -d '{"topic": "com.myapp.topic1", "args
 
 ```
 curl -H "Content-Type: application/json" \
-   -d '{"procedure": "org.eggs.get_current_sessions"}' \
+   -d '{"procedure": "com.myapp.my_rpc"}' \
    http://127.0.0.1:8181/call
 ```
 
