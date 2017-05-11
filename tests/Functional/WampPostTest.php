@@ -19,7 +19,7 @@ class WampPostTest extends TestCase
     {
         $router = $this->createTestRouter();
 
-        $wampPost = new WampPost("test_realm", \EventLoop\getLoop(), "tcp://127.0.0.1:18181/");
+        $wampPost = new WampPost("test_realm", \EventLoop\getLoop(), "tcp://127.0.0.1:18181");
 
         $opened = false;
 
