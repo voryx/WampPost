@@ -48,7 +48,7 @@ class BodySnatcher {
         $this->deferred->progress($data);
     }
 
-    public function handleClose($data) {
+    public function handleClose() {
         $this->resolvePromise();
     }
 

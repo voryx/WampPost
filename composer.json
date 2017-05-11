@@ -26,11 +26,12 @@
         }
     },
     "require": {
-        "react/http": "~0.4",
-        "voryx/thruway": "~0.3|~0.4"
+        "voryx/thruway": "0.5.x-dev",
+        "react/http": "^0.6.0"
     },
     "require-dev": {
-        "react/http-client": "^0.4.8",
-        "voryx/event-loop": "^0.2.0"
+        "voryx/event-loop": "^0.2.0",
+        "react/http-client": "^0.4.17",
+        "phpunit/phpunit": "5.7"
     }
 }

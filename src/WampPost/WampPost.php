@@ -13,28 +13,24 @@ use Thruway\Peer\Client;
 
 class WampPost extends Client {
     private $bindAddress;
-    private $port;
     private $realmName;
 
     /** @var Server */
     private $socket;
     private $http;
 
-    function __construct($realmName, $loop = null, $bindAddress = '127.0.0.1', $port = 8181)
+    function __construct($realmName, $loop = null, $bindAddress = 'tcp://127.0.0.1:8181')
     {
         if ($loop === null) {
             $loop = Factory::create();
         }
 
         $this->bindAddress = $bindAddress;
-        $this->port = $port;
         $this->realmName = $realmName;
-        $this->socket = new Server($loop);
+        $this->socket = new Server($this->bindAddress, $loop);
         $this->http = new \React\Http\Server($this->socket);
 
         $this->http->on('request', [$this, 'handleRequest']);
-
-        $this->socket->listen($this->port, $bindAddress);
 
         parent::__construct($realmName, $loop);
     }
@@ -53,7 +49,7 @@ class WampPost extends Client {
      */
     public function onClose($reason)
     {
-        $this->socket->shutdown();
+        $this->socket->close();
 
         parent::onClose($reason);
     }

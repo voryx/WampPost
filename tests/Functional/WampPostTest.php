@@ -4,8 +4,8 @@ namespace WampPost\Tests\Functional;
 
 use React\HttpClient\Response;
 use Thruway\ClientSession;
-use Thruway\Exception\WampErrorException;
 use Thruway\Message\EventMessage;
+use Thruway\WampErrorException;
 use WampPost\WampPost;
 
 class WampPostTest extends TestCase
@@ -19,7 +19,7 @@ class WampPostTest extends TestCase
     {
         $router = $this->createTestRouter();
 
-        $wampPost = new WampPost("test_realm", \EventLoop\getLoop(), "127.0.0.1", 18181);
+        $wampPost = new WampPost("test_realm", \EventLoop\getLoop(), "tcp://127.0.0.1:18181/");
 
         $opened = false;
 
@@ -79,7 +79,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "3\r\npub\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "pub");
         $this->assertEquals(200, $response->getCode());
 
         $this->assertEvents(
@@ -108,7 +108,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "3\r\npub\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "pub");
         $this->assertEquals(200, $response->getCode());
 
         $this->assertEvents(
@@ -143,7 +143,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "3\r\npub\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "pub");
         $this->assertEquals(200, $response->getCode());
 
         $this->assertEvents(
@@ -172,7 +172,7 @@ class WampPostTest extends TestCase
         );
 
         $this->assertEquals($responseBody,
-            "4f\r\nBad Request: Invalid request: {\"topic\":\"wamppost.tests.some.topic\",\"args\":null}\r\n0\r\n\r\n");
+            "Bad Request: Invalid request: {\"topic\":\"wamppost.tests.some.topic\",\"args\":null}");
         $this->assertEquals(400, $response->getCode());
 
         $this->assertEvents([], $events);
@@ -194,7 +194,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "2a\r\nBad Request: Invalid URI: wamppost.tests.*\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "Bad Request: Invalid URI: wamppost.tests.*");
         $this->assertEquals(400, $response->getCode());
 
         $this->assertEvents([], $events);
@@ -215,7 +215,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "2b\r\nBad Request: Invalid request: {\"args\":null}\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "Bad Request: Invalid request: {\"args\":null}");
         $this->assertEquals(400, $response->getCode());
 
         $this->assertEvents([], $events);
@@ -232,7 +232,7 @@ class WampPostTest extends TestCase
             '{ "topic": "wamppost.tests.some.topic", "args": [1,2,3], }'
         );
 
-        $this->assertEquals($responseBody, "2f\r\nBad Request: JSON decoding failed: Syntax error\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "Bad Request: JSON decoding failed: Syntax error");
         $this->assertEquals(400, $response->getCode());
 
         $this->assertEvents([], $events);
@@ -253,7 +253,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "9\r\nNot found\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "Not found");
         $this->assertEquals(404, $response->getCode());
 
         $this->assertEvents([], $events);
@@ -275,7 +275,7 @@ class WampPostTest extends TestCase
             )
         );
 
-        $this->assertEquals($responseBody, "78\r\n{\"result\":\"ERROR\",\"error_uri\":\"my.custom.error\",\"error_args\":[4,5,6],\"error_argskw\":{\"x\":\"y\"},\"error_details\":{\"y\":\"z\"}}\r\n0\r\n\r\n");
+        $this->assertEquals($responseBody, "{\"result\":\"ERROR\",\"error_uri\":\"my.custom.error\",\"error_args\":[4,5,6],\"error_argskw\":{\"x\":\"y\"},\"error_details\":{\"y\":\"z\"}}");
         $this->assertEquals(200, $response->getCode());
 
         $this->assertEvents([], $events);

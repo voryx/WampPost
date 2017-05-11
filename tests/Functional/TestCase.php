@@ -83,6 +83,8 @@ class TestCase extends \WampPost\Tests\TestCase
 
         $deferred = new Deferred();
 
+        $headers['Content-Length'] = strlen($body);
+
         $request = $httpClient->request($method, $url, $headers, $protocolVersion);
         $request->writeHead();
         $request->write($body);
