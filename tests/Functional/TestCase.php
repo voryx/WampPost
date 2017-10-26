@@ -2,7 +2,7 @@
 
 namespace WampPost\Tests\Functional;
 
-use React\Dns\Resolver\Factory;
+use function EventLoop\getLoop;
 use React\EventLoop\Timer\Timer;
 use React\Promise\Deferred;
 use Thruway\ClientSession;
@@ -75,29 +75,25 @@ class TestCase extends \WampPost\Tests\TestCase
 
     protected function makeHttpRequest($method, $url, array $headers = [], $protocolVersion = '1.0', $body)
     {
-        $dnsResolverFactory = new Factory();
-        $dnsResolver        = $dnsResolverFactory->createCached("127.0.0.1", \EventLoop\getLoop());
-
-        $httpFactory = new \React\HttpClient\Factory();
-        $httpClient  = $httpFactory->create(\EventLoop\getLoop(), $dnsResolver);
+        $httpClient = new \React\HttpClient\Client(getLoop());
 
         $deferred = new Deferred();
 
         $headers['Content-Length'] = strlen($body);
 
         $request = $httpClient->request($method, $url, $headers, $protocolVersion);
-        $request->writeHead();
-        $request->write($body);
+
         $request->on('response', function ($response) use ($deferred) {
             $responseBody = "";
-            $response->on('data', function ($data, $response) use (&$responseBody) {
+            $response->on('data', function ($data) use (&$responseBody) {
                 $responseBody .= $data;
             });
             $response->on('end', function () use (&$responseBody, $deferred, $response) {
                 $deferred->resolve([$response, $responseBody]);
             });
         });
-        $request->end();
+
+        $request->end($body);
 
         return $deferred->promise();
     }

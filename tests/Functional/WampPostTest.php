@@ -84,8 +84,7 @@ class WampPostTest extends TestCase
 
         $this->assertEvents(
             [
-                new EventMessage(0, 0, (object)["topic" => "wamppost.tests.some.topic"], [1, "two"], null, null,
-                    "wamppost.tests.some.topic")
+                new EventMessage(0, 0, (object)["topic" => "wamppost.tests.some.topic"], [1, "two"], null, null)
             ],
             $events
         );
