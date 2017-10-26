@@ -1,5 +1,5 @@
 {
-    "name": "voryx/wamppost",
+    "name": "nepda/wamppost",
     "description": "HTTP to WAMP Publishing Proxy",
     "keywords": [
         "WebSockets",
@@ -24,6 +24,9 @@
         "psr-0": {
             "WampPost": "src"
         }
+    },
+    "provide": {
+        "voryx/wamppost": "0.1.*"
     },
     "require": {
         "react/http": "~0.4",
