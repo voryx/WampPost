@@ -1,9 +1,9 @@
-[![Build Status](https://travis-ci.org/voryx/WampPost.svg?branch=master)](https://travis-ci.org/voryx/WampPost)
+[![Build Status](https://travis-ci.org/nepda/WampPost.svg?branch=master)](https://travis-ci.org/nepda/WampPost)
 WampPost
 ===========
 
 WampPost is a [WAMP v2](http://wamp.ws/) (Web Application Messaging Protocol) Client built with 
-[Thruway](https://github.com/voryx/Thruway) that allows publishing events and making RPC calls to a realm via HTTP Post.
+[Thruway](https://github.com/nepda/Thruway) that allows publishing events and making RPC calls to a realm via HTTP Post.
 
 WampPost is designed to be compatible with the [crossbar HTTP pusher service](http://crossbar.io/docs/HTTP-Pusher-Service/).
  
@@ -29,11 +29,11 @@ Download Composer [more info](https://getcomposer.org/doc/00-intro.md#downloadin
       
 Download WampPost and dependencies
 
-      $ php composer.phar require "voryx/wamppost":"dev-master"
+      $ php composer.phar require "nepda/wamppost":"dev-master"
 
 If you need a WAMP router to test with, then start the sample with:
 
-      $ php vendor/voryx/thruway/Examples/SimpleWsServer.php
+      $ php vendor/nepda/thruway/Examples/SimpleWsServer.php
     
 Thruway is now running on 127.0.0.1 port 9090.
 
