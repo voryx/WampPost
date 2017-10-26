@@ -28,9 +28,6 @@
       "WampPost": "src"
     }
   },
-  "provide": {
-    "voryx/wamppost": "0.1.*"
-  },
   "require": {
     "react/http": "~0.4",
     "voryx/thruway": "~0.4"
