@@ -32,7 +32,7 @@
     },
     "require": {
         "voryx/thruway": "^0.5.0",
-        "react/http": "dev-master"
+        "react/http": "^0.8.0"
     },
     "require-dev": {
         "voryx/event-loop": "^0.2.0",

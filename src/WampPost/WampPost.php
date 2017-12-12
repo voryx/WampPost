@@ -4,8 +4,7 @@ namespace WampPost;
 
 use Psr\Http\Message\ServerRequestInterface;
 use React\EventLoop\Factory;
-use React\Http\Middleware\RequestBodyBufferMiddleware;
-use React\Http\MiddlewareRunner;
+use React\EventLoop\LoopInterface;
 use React\Http\Response;
 use React\Promise\Deferred;
 use React\Socket\Server;
@@ -22,7 +21,7 @@ class WampPost extends Client {
     private $socket;
     private $http;
 
-    function __construct($realmName, $loop = null, $bindAddress = 'tcp://127.0.0.1:8181')
+    public function __construct($realmName, LoopInterface $loop = null, $bindAddress = 'tcp://127.0.0.1:8181')
     {
         if ($loop === null) {
             $loop = Factory::create();
@@ -31,10 +30,7 @@ class WampPost extends Client {
         $this->bindAddress = $bindAddress;
         $this->realmName = $realmName;
         $this->socket = new Server($this->bindAddress, $loop);
-        $this->http = new \React\Http\Server(new MiddlewareRunner([
-            new RequestBodyBufferMiddleware(16 * 1024 * 1024),
-            [$this, 'handleRequest']
-        ]));
+        $this->http = new \React\Http\Server([$this, 'handleRequest']);
 
         $this->http->listen($this->socket);
 
