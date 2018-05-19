@@ -44,20 +44,20 @@ class WampPost extends Client
         parent::onClose($reason);
     }
 
-    public function handleRequest(ServerRequestInterface $request, callable $next)
+    public function handleRequest(ServerRequestInterface $request)
     {
         if ($request->getMethod() === 'POST' && $request->getUri()->getPath() === '/pub') {
-            return $this->handlePublishHttpPost($request, $next);
+            return $this->handlePublishHttpPost($request);
         }
 
         if ($request->getMethod() === 'POST' && $request->getUri()->getPath() === '/call') {
-            return $this->handleCallHttpRequest($request, $next);
+            return $this->handleCallHttpRequest($request);
         }
 
         return new Response(404, [], 'Not found');
     }
 
-    private function handlePublishHttpPost(ServerRequestInterface $request, callable $next)
+    private function handlePublishHttpPost(ServerRequestInterface $request)
     {
         try {
             //{"topic": "com.myapp.topic1", "args": ["Hello, world"]}
@@ -91,7 +91,7 @@ class WampPost extends Client
         return new Response(200, [], 'pub');
     }
 
-    private function handleCallHttpRequest(ServerRequestInterface $request, callable $next)
+    private function handleCallHttpRequest(ServerRequestInterface $request)
     {
         $deferred = new Deferred();
         try {
