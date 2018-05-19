@@ -29,7 +29,7 @@ Download Composer [more info](https://getcomposer.org/doc/00-intro.md#downloadin
       
 Download WampPost and dependencies
 
-      $ php composer.phar require "voryx/wamppost":"dev-master"
+      $ php composer.phar require "voryx/wamppost" "thruway/pawl-transport"
 
 If you need a WAMP router to test with, then start the sample with:
 
