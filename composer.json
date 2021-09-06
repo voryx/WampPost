@@ -31,7 +31,7 @@
         }
     },
     "require": {
-        "voryx/thruway": "^0.5.0|^0.6.0",
+        "voryx/thruway": "^0.5.0 || ^0.6.0",
         "react/http": "^0.8.0"
     },
     "require-dev": {
